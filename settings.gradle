@@ -1,4 +1,4 @@
-rootProject.name = 'java-gradle-template-repo'
-include 'template-app'
-include 'template-api'
+rootProject.name = 'new-repo-1'
+include 'new-repo-1-app'
+include 'new-repo-1-api'
 
