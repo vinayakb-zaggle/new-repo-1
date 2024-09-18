@@ -1,0 +1,37 @@
+name: Project Setup on New Repo
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  rename-modules:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Rename Modules
+        run: |
+          full_repo_name=$(basename `git rev-parse --show-toplevel`)
+          if [[ $full_repo_name == *-service ]]; then
+            repo_name=${full_repo_name%-service}
+          else
+            repo_name=$full_repo_name
+          fi
+          echo "Repository name is $repo_name"
+          mv template-app "$repo_name-app"
+          mv template-api "$repo_name-api"
+          find . -type f -name "settings.gradle" -exec sed -i "s/template-app/$repo_name-app/g" {} +
+          find . -type f -name "settings.gradle" -exec sed -i "s/template-api/$repo_name-api/g" {} +
+          find . -type f -name "settings.gradle" -exec sed -i "s/rootProject.name = 'java-gradle-template-repo'/rootProject.name = '$full_repo_name'/g" {} +
+
+      - name: Commit changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add .
+          git commit -m "Initial Project Setup"
+          git push
